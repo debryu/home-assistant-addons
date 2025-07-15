@@ -1,5 +1,7 @@
 # Home Assistant Add-on: BatMON
 
+[![Analytics][install-shield]]()
+
 ![Home Assistant Dashboard Screenshot](https://repository-images.githubusercontent.com/445289350/03f3d531-37cf-48be-84c8-e6c75270fc87)
 
 Monitor and control various Battery management systems (BMS) over Bluetooth. This add-on reads the BMS and sends sensor
@@ -25,10 +27,12 @@ I created this to compare BMS readings for a detailed evaluation of BMS reliabil
 ### Supported Devices (bluetooth low energy)
 
 * JK BMS / jikong (JK02 protocol)
-* Daly BMS
+* Daly BMS (`daly`, `daly2`)
 * JBD / Jiabaida/ Xiaoxiang / Overkill Solar BMS
-* ANT BMS
-* Supervolt BMS
+* ANT BMS (`ant`)
+* CBT Power / Creabest BMS (`cbtpwr`)
+* Seplos BMS (`seplos`, `seplos_v2`)
+* Supervolt BMS (`supervolt`)
 * SOK BMS
 * Victron SmartShunt (make sure to update to the latest firmware
   and [enable GATT](https://community.victronenergy.com/questions/93919/victron-bluetooth-ble-protocol-publication.html)
@@ -63,10 +67,10 @@ Add an entry for each device, such as:
 find a list of visible Bluetooth devices in the add-on log. Alternatively you can enter the device name here as
 displayed in the discovery list.
 
-`type` can be `jk`, `jbd`, `ant`, `daly`, `supervolt`, `sok`, `victron` or `dummy`.
+`type` can be `jk`, `jk_24s`, `jk_32s`, `jbd`, `ant`, `daly`, `daly2`, `cbtpwr`, `seplos`, `seplos_v2`, `supervolt`, `sok`, `victron` or `dummy`.
 
 With the `alias` field you can set the MQTT topic prefix and the name as displayed in Home Assistant.
-Otherwise, the name as found in Bluetooth  discovery is used.
+Otherwise, the name as found in Bluetooth discovery is used.
 
 If the device requires a PIN when pairing (currently Victron SmartShunt only) add `pin: "123456"` (and replace 123456
 with device's PIN).
@@ -92,8 +96,9 @@ For verbose logs of particular BMS add `debug: true`.
 * `expire_values_after` time span in seconds when sensor values become "Unavailable"
 * `watchdog` stops the program on too many errors (make sure to enable the Home Assistant watchdog to restart the add-on
   after it exists)
-* Enable `install_newer_bleak` to install bleak 0.20.2, which is more stable than the default version. The default
-  version is known to be working with Victron SmartShunt.
+* For JK bms: set `type` to `jk_24s` for the older 24s version (firmware<11.x), `jk_32s` for the newer 32s version (fw>
+  =11.x), or `jk` if you don't know (might cause invalid battery data when detection fails)
+* type `daly2` is for a newer Daly BMS version which is untested
 
 ## Energy Meters
 
@@ -123,8 +128,8 @@ peaks, leading to even greater error.
 * `TimeoutError: timeout waiting`: put BT devices closer, disable inverters and other EMI sources
 * Enable `verbose_log` and check the logs. If that is too noisy set `debug: true` in the BMS configuration as described
   above
-* Toggle `install_newer_bleak` option
-* Try to find the BMS with a BLE scan [linux](https://ukbaz.github.io/howto/beacon_scan_cmd_line.html)
+* Try to find the BMS with a BLE
+  scan ([Chrome Browser](chrome://bluetooth-internals/#devices), [linux](https://ukbaz.github.io/howto/beacon_scan_cmd_line.html))
 * After a long-lasting bluetooth connection is lost both Daly and JBD dongles occasionally refuse to accept new
   connections and disappear from bluetooth discovery. Remove wires from the dongle and reconnect for a restart.
 * Some users reported unstable Bluetooth connection with Raspberry Pi 4 onboard bluetooth hardware and WiFi enabled. It
@@ -136,6 +141,10 @@ peaks, leading to even greater error.
   issues [106](https://github.com/fl4p/batmon-ha/issues/106) [109](https://github.com/fl4p/batmon-ha/issues/109)
 * Try another bluetooth hardware. Note you can choose the adapter with `adapter` parameter for each BMS individually
 * [doc/Downgrade.md](doc/Downgrade.md) to ab earlier version
+* to see more log entries, run this in the Terminal add-on: `ha host logs --identifier addon_<slug>_batmon`. You'll find
+  the slug in the URL of the add-on page.
+* to see logs during installation: Settings / System / Logs / Supervisor (choose from the menu at the top-right
+  corner), [link](`http://homeassistant.local:8123/config/logs?provider=supervisor`)
 
 ## TODO
 
@@ -168,3 +177,7 @@ See [doc/Standalone.md](doc/Standalone.md)
 * [Daly_RS485_UART_Protocol.pdf](https://github.com/jblance/mpp-solar/blob/master/docs/protocols/DALY-Daly_RS485_UART_Protocol.pdf)
 * [JK-bms esphome](https://github.com/syssi/esphome-jk-bms/blob/main/components/jk_bms_ble/jk_bms_ble.cpp#L336)
 * [JK02 protocol](https://github.com/jblance/mpp-solar/blob/master/mppsolar/protocols/jk02.py)
+
+
+
+[install-shield]: https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=green&label=Analytics&suffix=%20Installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/addons.json&query=$.2af0a32d_batmon.total
